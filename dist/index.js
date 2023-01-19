@@ -54,6 +54,7 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
     console.log(`El servidor se ejecuta en http://localhost:${port}`);
 });
+//CREAR USER
 app.post("/api/v1/users", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { name, email, password, date_born } = req.body;
     const last_session = new Date();
@@ -72,6 +73,7 @@ app.post("/api/v1/users", (req, res) => __awaiter(void 0, void 0, void 0, functi
     });
     res.json(user);
 }));
+//LOGIN
 app.post("/api/v1/users/login", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password } = req.body;
     const user = yield prisma.user.findUnique({
@@ -85,41 +87,52 @@ app.post("/api/v1/users/login", (req, res) => __awaiter(void 0, void 0, void 0, 
     if (!isMatch) {
         return res.status(401).json({ message: 'Invalid email or password' });
     }
-    //revisar aqui  
-    console.log(TOKEN_SECRET);
-    console.log(email);
     const token = jwt.sign(user, TOKEN_SECRET, {
         expiresIn: "1h",
     });
-    console.log(TOKEN_SECRET);
     // res.cookie('token', token, { httpOnly: true });  
-    return res.json({ message: 'Logged in successfully' });
+    return res.json({ message: 'Logged in successfully', token: token });
     //return res.status(201).json({user, token});      // 201: creado  
 }));
-app.post(" /api/v1/songs", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+//CREAR SONG
+app.post("/api/v1/songs", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { name, artist, album, year, genre, duration } = req.body;
     const song = yield prisma.song.create({
         data: {
-            name: name,
-            artist: artist,
-            album: album,
-            year: year,
-            genre: genre,
-            duration: duration
+            name,
+            artist,
+            album,
+            year,
+            genre,
+            duration
         },
     });
     res.json(song);
 }));
+//LISTAR CANCIONES
 app.get("/api/v1/songs", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield prisma.user.findMany();
+    const result = yield prisma.song.findMany();
     res.json(result);
 }));
+//LISTAR CANCIONES POR ID
 app.get("/api/v1/songs/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.body;
-    const result = yield prisma.user.findUnique({
+    const result = yield prisma.song.findUnique({
         where: {
             id
         },
     });
     res.json(result);
+}));
+//CREAR CANCION EN PLAYLIST 
+app.post("/api/v1/playlist", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { name, user_id } = req.body;
+    const playlist = yield prisma.playlist.create({
+        data: {
+            name,
+            user_id,
+            //song[]
+        },
+    });
+    res.json(playlist);
 }));
