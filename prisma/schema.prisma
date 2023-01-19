@@ -29,6 +29,7 @@ model Song {
   year      Int  
   genre     String  
   duration  Int  
+  status    Boolean
   playlistsongs   PlaylistSongs[]  
 }  
   

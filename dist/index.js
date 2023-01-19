@@ -39,6 +39,7 @@ const express_1 = __importDefault(require("express"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jwt = __importStar(require("jsonwebtoken"));
+const middleware_1 = require("./middleware");
 // Importando Prisma Client
 const client_1 = require("@prisma/client");
 dotenv_1.default.config();
@@ -48,9 +49,13 @@ const app = (0, express_1.default)();
 const port = process.env.PORT;
 app.use(express_1.default.json());
 const TOKEN_SECRET = process.env.TOKEN_SECRET || "claveSecreta";
-app.get('/', (req, res) => {
-    res.send('Express + TypeScript Server');
-});
+app.get('/', middleware_1.validateAuthorization, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const users = yield prisma.user.findMany();
+    res.send(users);
+}));
+// app.get('/', (req: Request, res: Response) => {
+//   res.send('Express + TypeScript Server');
+// });
 app.listen(port, () => {
     console.log(`El servidor se ejecuta en http://localhost:${port}`);
 });
@@ -88,12 +93,18 @@ app.post("/api/v1/users/login", (req, res) => __awaiter(void 0, void 0, void 0, 
     //revisar aqui  
     console.log(TOKEN_SECRET);
     console.log(email);
-    const token = jwt.sign(user, TOKEN_SECRET, {
+    let token = jwt.sign({ email }, TOKEN_SECRET, {
         expiresIn: "1h",
     });
+    // const token = jwt.sign({ username }, jwtKey, {
+    //   algorithm: "HS256",
+    //   expiresIn: jwtExpirySeconds,
+    //  })
+    console.log(token);
     console.log(TOKEN_SECRET);
+    // token = "Bearer " + token;
     // res.cookie('token', token, { httpOnly: true });  
-    return res.json({ message: 'Logged in successfully' });
+    return res.json({ message: 'Logged in successfully', user, token });
     //return res.status(201).json({user, token});      // 201: creado  
 }));
 app.post(" /api/v1/songs", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
