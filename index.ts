@@ -12,10 +12,14 @@ dotenv.config();
 // Iniciando el cliente
 const prisma = new PrismaClient()
 const app: Express = express();
+
 const port = process.env.PORT;
 app.use(express.json());
-const TOKEN_SECRET = process.env.TOKEN_SECRET || "claveSecreta";
 
+const TOKEN_SECRET = process.env.TOKEN_SECRET ;
+
+console.log("TOKEN_SECRET")
+console.log(TOKEN_SECRET)
 app.get('/', (req: Request, res: Response) => {
   res.send('Express + TypeScript Server');
 });
@@ -46,28 +50,34 @@ app.post("/api/v1/users", async (req, res) => {
 
   
 
-app.post("/api/v1/users/login", async (req: Request, res: Response) => { 
-    const { email, password } = req.body; 
-    const user = await prisma.user.findMany({ 
-      where: { email }, 
-      }); 
-    if (!user) { 
-        return res.status(401).json({ message: 'Invalid email or password' }); 
-    } 
-   
-    const isMatch = await bcrypt.compare(password, user.password ); 
-    if (!isMatch) { 
-      return res.status(401).json({ message: 'Invalid email or password' }); 
-    } 
- 
-    const token = jwt.sign(email,TOKEN_SECRET, { 
-      expiresIn: "1h", 
-    }) 
- 
-    res.cookie('token', token, { httpOnly: true }); 
- 
-    return res.json({ message: 'Logged in successfully' }); 
-    //return res.status(201).json({user, token});      // 201: creado 
+  app.post("/api/v1/users/login", async (req: Request, res: Response) => {  
+    const { email, password } = req.body;  
+    const user = await prisma.user.findUnique({  
+      where: { email },  
+      });  
+    if (!user) {  
+        return res.status(401).json({ message: 'Invalid email or password' });  
+    }  
+    console.log(user) 
+    
+    const isMatch = await bcrypt.compare(password, user.password );  
+    if (!isMatch) {  
+      return res.status(401).json({ message: 'Invalid email or password' });  
+    }  
+    
+    //revisar aqui  
+    console.log(TOKEN_SECRET) 
+    console.log(email) 
+
+  //   const token = jwt.sign(user, TOKEN_SECRET, {
+  //     expiresIn: "1h",
+  // });
+    
+  
+    // res.cookie('token', token, { httpOnly: true });  
+  
+    return res.json({ message: 'Logged in successfully' });  
+    //return res.status(201).json({user, token});      // 201: creado  
   });
 
 
