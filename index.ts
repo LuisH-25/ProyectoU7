@@ -30,6 +30,7 @@ app.listen(port, () => {
   console.log(`El servidor se ejecuta en http://localhost:${port}`);
 });
 
+//CREAR USER
 app.post("/api/v1/users", async (req, res) => {
     const { name, email, password, date_born} = req.body;
     const last_session= new Date()
@@ -51,12 +52,13 @@ app.post("/api/v1/users", async (req, res) => {
   });
 
   
-
+//LOGIN
   app.post("/api/v1/users/login", async (req: Request, res: Response) => {  
     const { email, password } = req.body;  
     const user = await prisma.user.findUnique({  
       where: { email },  
       });  
+
     if (!user) {  
         return res.status(401).json({ message: 'Invalid email or password' });  
     }  
@@ -67,10 +69,13 @@ app.post("/api/v1/users", async (req, res) => {
       return res.status(401).json({ message: 'Invalid email or password' });  
     }  
     
+
     //revisar aqui  
     console.log(TOKEN_SECRET) 
     console.log(email) 
-    let token = jwt.sign({email},TOKEN_SECRET, {  
+
+   
+    const token = jwt.sign(user,TOKEN_SECRET, {  
       expiresIn: "1h",  
     })  
     // const token = jwt.sign({ username }, jwtKey, {
@@ -84,38 +89,52 @@ app.post("/api/v1/users", async (req, res) => {
     // res.cookie('token', token, { httpOnly: true });  
   
     return res.json({ message: 'Logged in successfully' ,user, token});  
+
     //return res.status(201).json({user, token});      // 201: creado  
   });
 
-  app.post(" /api/v1/songs", async (req, res) => {
-    const { name, artist,album,year,genre,duration} = req.body;
+//CREAR SONG
+  app.post("/api/v1/songs", async (req, res) => {
+    const { name, artist ,album, year , genre ,duration} = req.body;
     const song = await prisma.song.create({
       data: {
-        name: name,
-        artist : artist,
-        album: album,
-        year: year,
-        genre: genre,
-        duration:duration
+        name,
+        artist,
+        album,
+        year,
+        genre,
+        duration
       },
     });
     res.json(song);
   });
 
-
+//LISTAR CANCIONES
   app.get("/api/v1/songs", async (req, res) => {
-    const result = await prisma.user.findMany();
+    const result = await prisma.song.findMany();
     res.json(result);
   });
 
+  //LISTAR CANCIONES POR ID
   app.get("/api/v1/songs/:id", async (req, res) => {
-    const { id} = req.body;
-    const result = await prisma.user.findUnique({
+    const {id} = req.body;
+    const result = await prisma.song.findUnique({
         where: {
           id
-
         },
       })
     res.json(result);
   });
 
+  //CREAR CANCION EN PLAYLIST 
+  app.post("/api/v1/playlist", async (req, res) => {
+    const { name, user_id } = req.body;
+    const playlist = await prisma.playlist.create({
+      data: {
+        name,
+        user_id,
+        //song[]
+      },
+    });
+    res.json(playlist);
+  });
