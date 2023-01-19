@@ -74,22 +74,27 @@ app.post("/api/v1/users", (req, res) => __awaiter(void 0, void 0, void 0, functi
 }));
 app.post("/api/v1/users/login", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password } = req.body;
-    const user = yield prisma.user.findMany({
+    const user = yield prisma.user.findUnique({
         where: { email },
     });
     if (!user) {
         return res.status(401).json({ message: 'Invalid email or password' });
     }
+    console.log(user);
     const isMatch = yield bcrypt_1.default.compare(password, user.password);
     if (!isMatch) {
         return res.status(401).json({ message: 'Invalid email or password' });
     }
-    const token = jwt.sign(email, TOKEN_SECRET, {
+    //revisar aqui  
+    console.log(TOKEN_SECRET);
+    console.log(email);
+    const token = jwt.sign(user, TOKEN_SECRET, {
         expiresIn: "1h",
     });
-    res.cookie('token', token, { httpOnly: true });
+    console.log(TOKEN_SECRET);
+    // res.cookie('token', token, { httpOnly: true });  
     return res.json({ message: 'Logged in successfully' });
-    //return res.status(201).json({user, token});      // 201: creado 
+    //return res.status(201).json({user, token});      // 201: creado  
 }));
 app.post(" /api/v1/songs", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { name, artist, album, year, genre, duration } = req.body;
