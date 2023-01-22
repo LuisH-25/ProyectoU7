@@ -16,7 +16,7 @@ const port = process.env.PORT;
 app.use(express.json());
 const TOKEN_SECRET = process.env.TOKEN_SECRET || "claveSecreta";
 
-app.get('/', validateAuthorization, async (req: Request, res: Response) =>{
+app.get('/', async (req: Request, res: Response) =>{
   const users = await prisma.user.findMany();
 
   res.send(users);
@@ -69,7 +69,6 @@ app.post("/api/v1/users", async (req, res) => {
       return res.status(401).json({ message: 'Invalid email or password' });  
     }  
     
-
     //revisar aqui  
     console.log(TOKEN_SECRET) 
     console.log(email) 
@@ -87,15 +86,13 @@ app.post("/api/v1/users", async (req, res) => {
     console.log(TOKEN_SECRET) 
     // token = "Bearer " + token;
     // res.cookie('token', token, { httpOnly: true });  
-  
     return res.json({ message: 'Logged in successfully' ,user, token});  
 
-    //return res.status(201).json({user, token});      // 201: creado  
   });
 
 //CREAR SONG
   app.post("/api/v1/songs", async (req, res) => {
-    const { name, artist ,album, year , genre ,duration} = req.body;
+    const { name, artist ,album, year , genre ,duration, status} = req.body;
     const song = await prisma.song.create({
       data: {
         name,
@@ -103,7 +100,8 @@ app.post("/api/v1/users", async (req, res) => {
         album,
         year,
         genre,
-        duration
+        duration,
+        status
       },
     });
     res.json(song);
@@ -126,15 +124,40 @@ app.post("/api/v1/users", async (req, res) => {
     res.json(result);
   });
 
+  //CREAR PLAYLIST
+  app.post("/api/v1/createplaylist", async (req, res) => {
+    const { name, user_id} = req.body;
+    const song = await prisma.playlist.create({
+      data: {
+       name,
+       user: { connect: { id: user_id } },
+      },
+    });
+    res.json(song);
+  });
   //CREAR CANCION EN PLAYLIST 
   app.post("/api/v1/playlist", async (req, res) => {
-    const { name, user_id } = req.body;
-    const playlist = await prisma.playlist.create({
-      data: {
-        name,
-        user_id,
-        //song[]
+    const { id_playlist, id_song } = req.body;
+    const playlist = await prisma.playlist.update({
+      where: { id: id_playlist },
+      data: { 
+        playlistsongs: {
+          connect: { id_song_id_playlist: id_song },
+        },
       },
     });
     res.json(playlist);
   });
+
+  // app.post("/api/v1/playlist", async (req, res) => {  
+  //   const { id_playlist, id_song } = req.body;  
+  //   const playlist = await prisma.playlistSongs.create({ 
+  //     data: { 
+  //       playlist: { connect: { id: id_playlist } }, 
+  //       song: { connect: { id: id_song } } ,
+  //       id_playlist: id_playlist, 
+  //       id_song: id_song, 
+  //     }, 
+  //   }); 
+  //   res.json(playlist);  
+  // });

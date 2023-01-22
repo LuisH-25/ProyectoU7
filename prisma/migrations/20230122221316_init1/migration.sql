@@ -17,7 +17,8 @@ CREATE TABLE "Song" (
     "album" TEXT NOT NULL,
     "year" INTEGER NOT NULL,
     "genre" TEXT NOT NULL,
-    "duration" INTEGER NOT NULL
+    "duration" INTEGER NOT NULL,
+    "status" BOOLEAN NOT NULL
 );
 
 -- CreateTable
@@ -32,10 +33,8 @@ CREATE TABLE "Playlist" (
 CREATE TABLE "PlaylistSongs" (
     "id_song" INTEGER NOT NULL,
     "id_playlist" INTEGER NOT NULL,
-    "playlist_id" INTEGER NOT NULL,
-    "song_id" INTEGER NOT NULL,
-    CONSTRAINT "PlaylistSongs_playlist_id_fkey" FOREIGN KEY ("playlist_id") REFERENCES "Playlist" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT "PlaylistSongs_song_id_fkey" FOREIGN KEY ("song_id") REFERENCES "Song" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    CONSTRAINT "PlaylistSongs_id_playlist_fkey" FOREIGN KEY ("id_playlist") REFERENCES "Playlist" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "PlaylistSongs_id_song_fkey" FOREIGN KEY ("id_song") REFERENCES "Song" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 -- CreateIndex

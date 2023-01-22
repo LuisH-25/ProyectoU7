@@ -39,7 +39,6 @@ const express_1 = __importDefault(require("express"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jwt = __importStar(require("jsonwebtoken"));
-const middleware_1 = require("./middleware");
 // Importando Prisma Client
 const client_1 = require("@prisma/client");
 dotenv_1.default.config();
@@ -49,7 +48,7 @@ const app = (0, express_1.default)();
 const port = process.env.PORT;
 app.use(express_1.default.json());
 const TOKEN_SECRET = process.env.TOKEN_SECRET || "claveSecreta";
-app.get('/', middleware_1.validateAuthorization, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const users = yield prisma.user.findMany();
     res.send(users);
 }));
@@ -107,11 +106,10 @@ app.post("/api/v1/users/login", (req, res) => __awaiter(void 0, void 0, void 0, 
     // token = "Bearer " + token;
     // res.cookie('token', token, { httpOnly: true });  
     return res.json({ message: 'Logged in successfully', user, token });
-    //return res.status(201).json({user, token});      // 201: creado  
 }));
 //CREAR SONG
 app.post("/api/v1/songs", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { name, artist, album, year, genre, duration } = req.body;
+    const { name, artist, album, year, genre, duration, status } = req.body;
     const song = yield prisma.song.create({
         data: {
             name,
@@ -119,7 +117,8 @@ app.post("/api/v1/songs", (req, res) => __awaiter(void 0, void 0, void 0, functi
             album,
             year,
             genre,
-            duration
+            duration,
+            status
         },
     });
     res.json(song);
@@ -139,15 +138,39 @@ app.get("/api/v1/songs/:id", (req, res) => __awaiter(void 0, void 0, void 0, fun
     });
     res.json(result);
 }));
-//CREAR CANCION EN PLAYLIST 
-app.post("/api/v1/playlist", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+//CREAR PLAYLIST
+app.post("/api/v1/createplaylist", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { name, user_id } = req.body;
-    const playlist = yield prisma.playlist.create({
+    const song = yield prisma.playlist.create({
         data: {
             name,
-            user_id,
-            //song[]
+            user: { connect: { id: user_id } },
+        },
+    });
+    res.json(song);
+}));
+//CREAR CANCION EN PLAYLIST 
+app.post("/api/v1/playlist", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id_playlist, id_song } = req.body;
+    const playlist = yield prisma.playlist.update({
+        where: { id: id_playlist },
+        data: {
+            playlistsongs: {
+                connect: { id_song_id_playlist: id_song },
+            },
         },
     });
     res.json(playlist);
 }));
+// app.post("/api/v1/playlist", async (req, res) => {  
+//   const { id_playlist, id_song } = req.body;  
+//   const playlist = await prisma.playlistSongs.create({ 
+//     data: { 
+//       playlist: { connect: { id: id_playlist } }, 
+//       song: { connect: { id: id_song } } ,
+//       id_playlist: id_playlist, 
+//       id_song: id_song, 
+//     }, 
+//   }); 
+//   res.json(playlist);  
+// });

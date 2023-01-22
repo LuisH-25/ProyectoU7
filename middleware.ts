@@ -4,8 +4,6 @@
 
 import { NextFunction } from "express";
 import { verify, TokenExpiredError, JsonWebTokenError } from "jsonwebtoken";
-
-
 import * as jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 dotenv.config();
