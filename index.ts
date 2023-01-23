@@ -7,6 +7,7 @@ import { validateAuthorization } from './middleware';
 // Importando Prisma Client
 import { PrismaClient } from '@prisma/client'
 
+
 dotenv.config();
 
 // Iniciando el cliente

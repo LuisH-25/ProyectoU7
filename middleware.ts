@@ -2,17 +2,16 @@
 //     Aithorization: "Bearer token"
 // }
 
-import { NextFunction } from "express";
-import { verify, TokenExpiredError, JsonWebTokenError } from "jsonwebtoken";
-import * as jwt from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import type { NextFunction, Request, Response } from "express";
+
 dotenv.config();
 let TOKEN_SECRET = process.env.TOKEN_SECRET || "claveSecreta";
 
 export function validateAuthorization(req: any, res: any, next: any) { 
     const { authorization } = req.headers; 
-    console.log(authorization); 
-
+    
     if (!authorization) return res.status(401).json({ message: "Campo no enviado" }); 
 
     if (!authorization.startsWith("Bearer ")) 
@@ -20,22 +19,7 @@ export function validateAuthorization(req: any, res: any, next: any) {
 
     const token = authorization.replace("Bearer ", "");
 
-    console.log(token); 
-    console.log("token"); 
-    console.log(TOKEN_SECRET); 
-    console.log("TOKEN_SECRET"); 
-
-    try {
-        const decoded = verify(token, TOKEN_SECRET);
-        console.log(decoded); 
-        console.log("decoded"); 
-        return decoded;
-    } catch (err) {
-        if (err instanceof TokenExpiredError) {
-            console.log("Token expired");
-        } else if (err instanceof JsonWebTokenError) {
-            console.log("Invalid token");
-        }
-        return null;
-    }
+    const user = jwt.verify(token, TOKEN_SECRET);
+    (req as any).user = user;
+    next()
 }
