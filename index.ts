@@ -126,28 +126,38 @@ app.post("/api/v1/users", async (req, res) => {
   });
 
   //CREAR PLAYLIST
+    // EJEMPLO DE CREACION DE UN PLAYLIST
+    // { 
+    //   "name": "Playlist 1", 
+    //   "user_id": 1
+    // }
   app.post("/api/v1/createplaylist", async (req, res) => {
     const { name, user_id} = req.body;
-    const song = await prisma.playlist.create({
+    const playlist = await prisma.playlist.create({
       data: {
        name,
        user: { connect: { id: user_id } },
       },
     });
-    res.json(song);
+    return res.json({ message: 'Playlist creado satisfactoriamente' ,playlist});  
   });
   //CREAR CANCION EN PLAYLIST 
   app.post("/api/v1/playlist", async (req, res) => {
-    const { id_playlist, id_song } = req.body;
+    const data = req.body;
+
     const playlist = await prisma.playlist.update({
-      where: { id: id_playlist },
-      data: { 
-        playlistsongs: {
-          connect: { id_song_id_playlist: id_song },
-        },
+      where:{
+        id: data.id_playlist
       },
+      include: {
+        songs: true,
+      },
+      data: {
+        songs: { connect: { id: data.id_song } }
+      }
     });
-    res.json(playlist);
+  
+    return res.json({ message: 'Cancion añadida al Playlist satisfactoriamente' ,playlist});  
   });
 
   // app.post("/api/v1/playlist", async (req, res) => {  
