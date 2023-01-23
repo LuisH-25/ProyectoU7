@@ -1,38 +1,39 @@
 import express, { Express, Request, Response } from 'express';
-import dotenv from 'dotenv';
-import bcrypt from 'bcrypt';
-import * as jwt from 'jsonwebtoken';
+import dotenv from "dotenv";
+import { PrismaClient } from "@prisma/client";
+import { validateAuthorization } from "./middleware";
 
-import { validateAuthorization } from './middleware';
-// Importando Prisma Client
-import { PrismaClient } from '@prisma/client'
-
+import bcrypt from "bcrypt"
+//import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 dotenv.config();
 
-// Iniciando el cliente
 const prisma = new PrismaClient()
 const app: Express = express();
-const port = process.env.PORT;
-app.use(express.json());
-const TOKEN_SECRET = process.env.TOKEN_SECRET || "claveSecreta";
+const PORT = process.env.PORT || 3000;
 
+app.use(express.json());
+
+app.listen(PORT, () => {
+  console.log(`El servidor se ejecuta en http://localhost:${PORT}`);
+});
+
+//PRINT ALL USER (MOSTRAR TODOS LOS USUARIOS)
 app.get('/', async (req: Request, res: Response) =>{
   const users = await prisma.user.findMany();
 
   res.send(users);
 })
 
-// app.get('/', (req: Request, res: Response) => {
-//   res.send('Express + TypeScript Server');
-// });
-
-app.listen(port, () => {
-  console.log(`El servidor se ejecuta en http://localhost:${port}`);
-});
-
-//CREAR USER
-app.post("/api/v1/users", async (req, res) => {
+//SIGN UP (CREAR USUARIO)
+  // EJEMPLO DE CREAR NUEVO USUARIO
+  // {
+  //   "name": "Luis",
+  //   "email": "Luis@gmail.com",
+  //   "password": "123"
+  // }
+app.post("/api/v1/users", async (req: Request, res: Response) => {
     const { name, email, password, date_born} = req.body;
     const last_session= new Date()
     const update_at= new Date()
@@ -46,7 +47,7 @@ app.post("/api/v1/users", async (req, res) => {
             password : hashedPassword,
             last_session ,
             update_at ,
-            date_born : new Date()
+            date_born : new Date(date_born)
           },
     });
     res.json(user);
@@ -70,52 +71,32 @@ app.post("/api/v1/users", async (req, res) => {
       return res.status(401).json({ message: 'Invalid email or password' });  
     }  
     
-    //revisar aqui  
-    console.log(TOKEN_SECRET) 
-    console.log(email) 
-
-   
-    const token = jwt.sign(user,TOKEN_SECRET, {  
+    const token = jwt.sign(user,process.env.TOKEN_SECRET!, {  
       expiresIn: "1h",  
     })  
-    // const token = jwt.sign({ username }, jwtKey, {
-    //   algorithm: "HS256",
-    //   expiresIn: jwtExpirySeconds,
-    //  })
-
-    console.log(token) 
-    console.log(TOKEN_SECRET) 
-    // token = "Bearer " + token;
-    // res.cookie('token', token, { httpOnly: true });  
     return res.json({ message: 'Logged in successfully' ,user, token});  
 
   });
 
 //CREAR SONG
-  app.post("/api/v1/songs", async (req, res) => {
-    const { name, artist ,album, year , genre ,duration, status} = req.body;
+  app.post("/api/v1/songs", async (req: Request, res: Response) => {
+    const data = req.body;
     const song = await prisma.song.create({
-      data: {
-        name,
-        artist,
-        album,
-        year,
-        genre,
-        duration,
-        status
-      },
+      data
     });
     res.json(song);
+    return res.json({ message: 'Cancion creada satisfactoriamente' ,song});  
   });
 
 //LISTAR CANCIONES
-  app.get("/api/v1/songs", async (req, res) => {
-    const result = await prisma.song.findMany();
-    res.json(result);
-  });
+app.post("/api/v1/songs/all",validateAuthorization, async (req: Request, res: Response) => {
+  const songs = await prisma.song.findMany();
+  
+    res.send(songs);
+});
 
   //LISTAR CANCIONES POR ID
-  app.get("/api/v1/songs/:id", async (req, res) => {
+  app.get("/api/v1/songs/:id", async (req: Request, res: Response) => {
     const {id} = req.body;
     const result = await prisma.song.findUnique({
         where: {
@@ -131,7 +112,7 @@ app.post("/api/v1/users", async (req, res) => {
     //   "name": "Playlist 1", 
     //   "user_id": 1
     // }
-  app.post("/api/v1/createplaylist", async (req, res) => {
+  app.post("/api/v1/createplaylist", async (req: Request, res: Response) => {
     const { name, user_id} = req.body;
     const playlist = await prisma.playlist.create({
       data: {
@@ -141,8 +122,9 @@ app.post("/api/v1/users", async (req, res) => {
     });
     return res.json({ message: 'Playlist creado satisfactoriamente' ,playlist});  
   });
+
   //CREAR CANCION EN PLAYLIST 
-  app.post("/api/v1/playlist", async (req, res) => {
+  app.post("/api/v1/playlist", async (req: Request, res: Response) => {
     const data = req.body;
 
     const playlist = await prisma.playlist.update({
