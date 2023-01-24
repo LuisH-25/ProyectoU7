@@ -29,7 +29,7 @@ model Song {
   year      Int  
   genre     String  
   duration  Int  
-  status    Boolean
+  isPrivate    Boolean @default(false)
   playlists Playlist[] 
   @@map("Song")
 }  

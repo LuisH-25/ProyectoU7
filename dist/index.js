@@ -1,27 +1,4 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -37,45 +14,50 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const dotenv_1 = __importDefault(require("dotenv"));
-const bcrypt_1 = __importDefault(require("bcrypt"));
-const jwt = __importStar(require("jsonwebtoken"));
-// Importando Prisma Client
 const client_1 = require("@prisma/client");
+const middleware_1 = require("./middleware");
+const bcrypt_1 = __importDefault(require("bcrypt"));
+//import bcrypt from "bcrypt";
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 dotenv_1.default.config();
-// Iniciando el cliente
 const prisma = new client_1.PrismaClient();
 const app = (0, express_1.default)();
-const port = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 app.use(express_1.default.json());
-const TOKEN_SECRET = process.env.TOKEN_SECRET || "claveSecreta";
+app.listen(PORT, () => {
+    console.log(`El servidor se ejecuta en http://localhost:${PORT}`);
+});
+//PRINT ALL USER (MOSTRAR TODOS LOS USUARIOS) CON AUTENTICACION
 app.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const users = yield prisma.user.findMany();
     res.send(users);
 }));
-// app.get('/', (req: Request, res: Response) => {
-//   res.send('Express + TypeScript Server');
-// });
-app.listen(port, () => {
-    console.log(`El servidor se ejecuta en http://localhost:${port}`);
-});
-//CREAR USER
+//SIGN UP (CREAR USUARIO)
 app.post("/api/v1/users", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { name, email, password, date_born } = req.body;
     const last_session = new Date();
     const update_at = new Date();
     const saltRounds = 10;
     const hashedPassword = yield bcrypt_1.default.hash(password, saltRounds);
-    const user = yield prisma.user.create({
-        data: {
-            name,
-            email,
-            password: hashedPassword,
-            last_session,
-            update_at,
-            date_born: new Date()
-        },
+    const user_email = yield prisma.user.findUnique({
+        where: { email }
     });
-    res.json(user);
+    try {
+        const user = yield prisma.user.create({
+            data: {
+                name,
+                email,
+                password: hashedPassword,
+                last_session,
+                update_at,
+                date_born: new Date(date_born)
+            },
+        });
+        res.json({ message: 'User created successfully', user });
+    }
+    catch (e) {
+        res.status(500).json({ message: 'Error creating user' });
+    }
 }));
 //LOGIN
 app.post("/api/v1/users/login", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -91,42 +73,28 @@ app.post("/api/v1/users/login", (req, res) => __awaiter(void 0, void 0, void 0, 
     if (!isMatch) {
         return res.status(401).json({ message: 'Invalid email or password' });
     }
-    //revisar aqui  
-    console.log(TOKEN_SECRET);
-    console.log(email);
-    const token = jwt.sign(user, TOKEN_SECRET, {
+    const token = jsonwebtoken_1.default.sign(user, process.env.TOKEN_SECRET, {
         expiresIn: "1h",
     });
-    // const token = jwt.sign({ username }, jwtKey, {
-    //   algorithm: "HS256",
-    //   expiresIn: jwtExpirySeconds,
-    //  })
-    console.log(token);
-    console.log(TOKEN_SECRET);
-    // token = "Bearer " + token;
-    // res.cookie('token', token, { httpOnly: true });  
     return res.json({ message: 'Logged in successfully', user, token });
 }));
 //CREAR SONG
 app.post("/api/v1/songs", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { name, artist, album, year, genre, duration, status } = req.body;
-    const song = yield prisma.song.create({
-        data: {
-            name,
-            artist,
-            album,
-            year,
-            genre,
-            duration,
-            status
-        },
-    });
-    res.json(song);
+    const data = req.body;
+    try {
+        const song = yield prisma.song.create({
+            data
+        });
+        return res.json({ message: 'Song created successfully', song });
+    }
+    catch (e) {
+        return res.status(500).json({ message: 'Error creating song', e });
+    }
 }));
 //LISTAR CANCIONES
-app.get("/api/v1/songs", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield prisma.song.findMany();
-    res.json(result);
+app.post("/api/v1/songs/all", middleware_1.validateAuthorization, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const songs = yield prisma.song.findMany();
+    return res.send({ message: 'Song listed successfully', songs });
 }));
 //LISTAR CANCIONES POR ID
 app.get("/api/v1/songs/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -136,41 +104,32 @@ app.get("/api/v1/songs/:id", (req, res) => __awaiter(void 0, void 0, void 0, fun
             id
         },
     });
-    res.json(result);
+    return res.json({ message: 'Song listed by id successfully', result });
 }));
 //CREAR PLAYLIST
 app.post("/api/v1/createplaylist", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { name, user_id } = req.body;
-    const song = yield prisma.playlist.create({
+    const playlist = yield prisma.playlist.create({
         data: {
             name,
             user: { connect: { id: user_id } },
         },
     });
-    res.json(song);
+    return res.json({ message: 'Playlist created successfully', playlist });
 }));
 //CREAR CANCION EN PLAYLIST 
 app.post("/api/v1/playlist", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { id_playlist, id_song } = req.body;
+    const data = req.body;
     const playlist = yield prisma.playlist.update({
-        where: { id: id_playlist },
-        data: {
-            playlistsongs: {
-                connect: { id_song_id_playlist: id_song },
-            },
+        where: {
+            id: data.id_playlist
         },
+        include: {
+            songs: true,
+        },
+        data: {
+            songs: { connect: { id: data.id_song } }
+        }
     });
-    res.json(playlist);
+    return res.json({ message: 'Song added to playlist successfully', playlist });
 }));
-// app.post("/api/v1/playlist", async (req, res) => {  
-//   const { id_playlist, id_song } = req.body;  
-//   const playlist = await prisma.playlistSongs.create({ 
-//     data: { 
-//       playlist: { connect: { id: id_playlist } }, 
-//       song: { connect: { id: id_song } } ,
-//       id_playlist: id_playlist, 
-//       id_song: id_song, 
-//     }, 
-//   }); 
-//   res.json(playlist);  
-// });
