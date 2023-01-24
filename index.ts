@@ -93,18 +93,34 @@ app.post("/api/v1/users", async (req: Request, res: Response) => {
       });
       return res.json({ message: 'Song created successfully' ,song});  
     }catch (e) {
-      return res.status(500).json({ message: 'Error creating song', e });
+      return res.status(500).json({ message: 'Error creating song' });
     }
   });
 
-//LISTAR CANCIONES
+//LISTAR CANCIONES LOGUEADO
 app.post("/api/v1/songs/all",validateAuthorization, async (req: Request, res: Response) => {
-  const songs = await prisma.song.findMany();
+  try{
+    const songs = await prisma.song.findMany();
+    return res.send({ message: 'Song listed successfully', songs});
+  }catch (e){
+    return res.status(500).json({ message: 'Intentar por el método get sino tiene autenticacion', e });
+  }
+});
+
+//LISTAR CANCIONES SIN LOGUEARSE
+app.get("/api/v1/songs/all", async (req: Request, res: Response) => {
+  const songs = await prisma.song.findMany(
+    {  where: {
+      isPrivate: false
+     }
+    }
+  );
+    
     return res.send({ message: 'Song listed successfully', songs});
 });
 
 //LISTAR CANCIONES POR ID
-  app.get("/api/v1/songs/:id", async (req: Request, res: Response) => {
+  app.get("/api/v1/songs/:id",validateAuthorization, async (req: Request, res: Response) => {
     const {id} = req.body;
     const result = await prisma.song.findUnique({
         where: {

@@ -88,16 +88,29 @@ app.post("/api/v1/songs", (req, res) => __awaiter(void 0, void 0, void 0, functi
         return res.json({ message: 'Song created successfully', song });
     }
     catch (e) {
-        return res.status(500).json({ message: 'Error creating song', e });
+        return res.status(500).json({ message: 'Error creating song' });
     }
 }));
-//LISTAR CANCIONES
+//LISTAR CANCIONES LOGUEADO
 app.post("/api/v1/songs/all", middleware_1.validateAuthorization, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const songs = yield prisma.song.findMany();
+    try {
+        const songs = yield prisma.song.findMany();
+        return res.send({ message: 'Song listed successfully', songs });
+    }
+    catch (e) {
+        return res.status(500).json({ message: 'Intentar por el método get sino tiene autenticacion', e });
+    }
+}));
+//LISTAR CANCIONES SIN LOGUEARSE
+app.get("/api/v1/songs/all", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const songs = yield prisma.song.findMany({ where: {
+            isPrivate: false
+        }
+    });
     return res.send({ message: 'Song listed successfully', songs });
 }));
 //LISTAR CANCIONES POR ID
-app.get("/api/v1/songs/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.get("/api/v1/songs/:id", middleware_1.validateAuthorization, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.body;
     const result = yield prisma.song.findUnique({
         where: {
