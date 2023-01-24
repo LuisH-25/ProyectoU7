@@ -16,5 +16,13 @@ _Que cosas necesitas para instalar el software y como instalarlas_
 npm install
 ```
 
+# Modelos de Prisma
+| User                    |
+| ------------------------------|
+|    atributo   |       tipo    |
+| ------------- | ------------- |
+| Content Cell  | Content Cell  |
+| Content Cell  | Content Cell  |
+
 
 
