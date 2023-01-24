@@ -17,12 +17,13 @@ npm install
 ```
 
 # Modelos de Prisma
-| User                    |
-| ------------------------------|
+
+
+
 |    atributo   |       tipo    |
 | ------------- | ------------- |
-| Content Cell  | Content Cell  |
-| Content Cell  | Content Cell  |
+| id  | int |
+| name  | String  |
 
 
 
