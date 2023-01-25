@@ -9,7 +9,7 @@ import jwt from "jsonwebtoken";
 import e from 'express';
 
 dotenv.config();
-
+ 
 const prisma = new PrismaClient()
 const app: Express = express();
 const PORT = process.env.PORT || 3000;
@@ -85,7 +85,7 @@ app.post("/api/v1/users", async (req: Request, res: Response) => {
   });
 
 //CREAR SONG
-  app.post("/api/v1/songs", async (req: Request, res: Response) => {
+  app.post("/api/v1/songs", validateAuthorization, async (req: Request, res: Response) => {
     const data = req.body;
     try{
       const song = await prisma.song.create({
@@ -93,7 +93,7 @@ app.post("/api/v1/users", async (req: Request, res: Response) => {
       });
       return res.json({ message: 'Song created successfully' ,song});  
     }catch (e) {
-      return res.status(500).json({ message: 'Error creating song' });
+      return res.status(500).json({ message: 'Error creating song', e});
     }
   });
 
@@ -121,13 +121,15 @@ app.get("/api/v1/songs/all", async (req: Request, res: Response) => {
 
 //LISTAR CANCIONES POR ID
   app.get("/api/v1/songs/:id",validateAuthorization, async (req: Request, res: Response) => {
-    const {id} = req.body;
-    const result = await prisma.song.findUnique({
+    const id =parseInt(req.params.id);
+  
+      const result = await prisma.song.findUnique({
         where: {
           id
-        },
+        }
       })
-    return res.json({ message: 'Song listed by id successfully', result});
+       if (!(result==null)) return res.json({ message: 'Song listed by id successfully', result});
+       else return res.status(500).json({ message: 'Id no existe'});    
   });
 
   //CREAR PLAYLIST

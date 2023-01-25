@@ -79,7 +79,7 @@ app.post("/api/v1/users/login", (req, res) => __awaiter(void 0, void 0, void 0, 
     return res.json({ message: 'Logged in successfully', user, token });
 }));
 //CREAR SONG
-app.post("/api/v1/songs", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.post("/api/v1/songs", middleware_1.validateAuthorization, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const data = req.body;
     try {
         const song = yield prisma.song.create({
@@ -88,7 +88,7 @@ app.post("/api/v1/songs", (req, res) => __awaiter(void 0, void 0, void 0, functi
         return res.json({ message: 'Song created successfully', song });
     }
     catch (e) {
-        return res.status(500).json({ message: 'Error creating song' });
+        return res.status(500).json({ message: 'Error creating song', e });
     }
 }));
 //LISTAR CANCIONES LOGUEADO
@@ -111,13 +111,16 @@ app.get("/api/v1/songs/all", (req, res) => __awaiter(void 0, void 0, void 0, fun
 }));
 //LISTAR CANCIONES POR ID
 app.get("/api/v1/songs/:id", middleware_1.validateAuthorization, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { id } = req.body;
+    const id = parseInt(req.params.id);
     const result = yield prisma.song.findUnique({
         where: {
             id
-        },
+        }
     });
-    return res.json({ message: 'Song listed by id successfully', result });
+    if (!(result == null))
+        return res.json({ message: 'Song listed by id successfully', result });
+    else
+        return res.status(500).json({ message: 'Id no existe' });
 }));
 //CREAR PLAYLIST
 app.post("/api/v1/createplaylist", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
