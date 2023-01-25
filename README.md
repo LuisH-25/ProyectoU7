@@ -103,11 +103,11 @@ _Únicamente se mostrará las canciones publicas_
 
 | Parameter | Type     |           
 | :-------- | :------- | 
-| `id` | `int` |
+| id | `int` |
 
  Headers | Type     |           
 | :-------- | :------- | 
-| `Authorization` | `string`|
+| Authorization | `string`|
 
 
 ### Crear playlist
@@ -118,8 +118,8 @@ _Únicamente se mostrará las canciones publicas_
 
 | Parameter | Type     |           
 | :-------- | :------- | 
-| `name` | `string` | 
-| `user_id` | `int` | 
+| name | `string` | 
+| user_id | `int` | 
 
 
 ## Añadir canción a la playlist
@@ -130,8 +130,8 @@ _Únicamente se mostrará las canciones publicas_
 
 | Parameter | Type     |           
 | :-------- | :------- | 
-| `id_song` | `int` | 
-| `id_playlist` | `int` | 
+| id_song | `int` | 
+| id_playlist | `int` | 
 
 ## Listar usuarios
 ```
