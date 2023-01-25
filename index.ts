@@ -20,7 +20,7 @@ app.listen(PORT, () => {
   console.log(`El servidor se ejecuta en http://localhost:${PORT}`);
 });
 
-//PRINT ALL USER (MOSTRAR TODOS LOS USUARIOS) CON AUTENTICACION
+//LISTAR TODOS LOS USUARIOS (MOSTRAR TODOS LOS USUARIOS) CON AUTENTICACION
 app.get('/', async (req: Request, res: Response) =>{
   const users = await prisma.user.findMany();
   res.send(users);
