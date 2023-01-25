@@ -81,7 +81,7 @@ Correr el proyecto
 ### Listar canciones logueandose
 _Mostrar las canciones sean públicas o privadas_
 
-```http
+```
   POST /api/v1/songs/all
 ```
 
@@ -92,12 +92,12 @@ _Mostrar las canciones sean públicas o privadas_
 ### Listar canciones sin loguearse
 _Únicamente se mostrará las canciones publicas_
 
-```http
+```
   GET /api/v1/songs/all
 ```
 
 ### Listar canción por ID 
-```http
+```
   GET /api/v1/songs/:id
 ```
 
@@ -112,7 +112,7 @@ _Únicamente se mostrará las canciones publicas_
 
 ### Crear playlist
 
-```http
+```
   POST /api/v1/createplaylist
 ```
 
@@ -124,7 +124,7 @@ _Únicamente se mostrará las canciones publicas_
 
 ## Añadir canción a la playlist
 
-```http
+```
   POST /api/v1/playlist
 ```
 
