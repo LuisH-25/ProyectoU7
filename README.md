@@ -18,7 +18,7 @@ Instalar dependencias
 ```
   npm install
 ```
-Install directorio dist
+Instalar el directorio dist
 ```
   npx tsc --init
 ```
