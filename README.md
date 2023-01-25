@@ -12,18 +12,134 @@ Mira **Instalación** para conocer como desplegar el proyecto.
 _Que cosas necesitas para instalar el software y como instalarlas_
 
 ### Pasos a realizar para ejecutar:
+
+Instalar dependencias
+
 ```
-npm install
+  npm install
+```
+Install directorio dist
+```
+  npx tsc --init
 ```
 
-# Modelos de Prisma
+Realizar migraciones
+
+```
+  npx prisma migrate dev --name init
+```
+
+Correr el proyecto
+
+```
+  npm run dev
+```
+
+# API
+
+## Descripción de Enpoints
+
+### Crear usuario
+
+```
+  POST /api/v1/users
+```
+
+| Parameter | Type     |  
+| :-------- | :------- | 
+| `name` | `string` | `string` | 
+| `password` | `string` | 
+| `date_born` | `date` | 
+
+### Login
+
+```
+  POST /api/v1/users/login
+```
+
+| Parameter | Type     |           
+| :-------- | :------- | 
+| `email` | `string` | 
+| `password` | `string` | 
+
+### Crear canción
+
+```
+  POST /api/v1/songs
+```
+
+| Parameter | Type     |           
+| :-------- | :------- | 
+| `name` | `string` | 
+| `artist` | `string` | 
+| `album` | `string` | 
+| `year` | `int` | 
+| `genre` | `string` | 
+| `duration` | `int` |
+| `isPrivate` | `boolean` | 
+
+### Listar canciones logueandose
+_Mostrar las canciones sean públicas o privadas_
+
+```http
+  POST /api/v1/songs/all
+```
+
+| Headers | Type     |           
+| :-------- | :------- | 
+| `Authorization` | `string` |
+
+### Listar canciones sin loguearse
+_Únicamente se mostrará las canciones publicas_
+
+```http
+  GET /api/v1/songs/all
+```
+
+### Listar canción por ID 
+```http
+  GET /api/v1/songs/:id
+```
+
+| Parameter | Type     |           
+| :-------- | :------- | 
+| `id` | `int` |
+
+ Headers | Type     |           
+| :-------- | :------- | 
+| `Authorization` | `string`|
+
+
+### Crear playlist
+
+```http
+  POST /api/v1/createplaylist
+```
+
+| Parameter | Type     |           
+| :-------- | :------- | 
+| `name` | `string` | 
+| `user_id` | `int` | 
+
+
+## Añadir canción a la playlist
+
+```http
+  POST /api/v1/playlist
+```
+
+| Parameter | Type     |           
+| :-------- | :------- | 
+| `id_song` | `int` | 
+| `id_playlist` | `int` | 
+
+## Listar usuarios
+```
+  GET /
+```
 
 
 
-|    atributo   |       tipo    |
-| :------------:|:---------------:|
-| id  | int |
-| name  | String  |
 
 
 

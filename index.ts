@@ -142,7 +142,7 @@ app.get("/api/v1/songs/all", async (req: Request, res: Response) => {
     return res.json({ message: 'Playlist created successfully' ,playlist});  
   });
 
-  //CREAR CANCION EN PLAYLIST 
+  //AÑADIR UNA CANCION EN PLAYLIST 
   app.post("/api/v1/playlist", async (req: Request, res: Response) => {
     const data = req.body;
 

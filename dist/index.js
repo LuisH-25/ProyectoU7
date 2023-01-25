@@ -130,7 +130,7 @@ app.post("/api/v1/createplaylist", (req, res) => __awaiter(void 0, void 0, void 
     });
     return res.json({ message: 'Playlist created successfully', playlist });
 }));
-//CREAR CANCION EN PLAYLIST 
+//AÑADIR UNA CANCION EN PLAYLIST 
 app.post("/api/v1/playlist", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const data = req.body;
     const playlist = yield prisma.playlist.update({
