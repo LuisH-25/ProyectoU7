@@ -47,9 +47,9 @@ Correr el proyecto
 
 | Parameter | Type     |  
 | :-------- | :------- | 
-| `name` | `string` | `string` | 
-| `password` | `string` | 
-| `date_born` | `date` | 
+| name | `string` |
+| password | `string` | 
+| date_born | `date` | 
 
 ### Login
 
@@ -59,8 +59,8 @@ Correr el proyecto
 
 | Parameter | Type     |           
 | :-------- | :------- | 
-| `email` | `string` | 
-| `password` | `string` | 
+| email | `string` | 
+| password | `string` | 
 
 ### Crear canción
 
@@ -70,13 +70,13 @@ Correr el proyecto
 
 | Parameter | Type     |           
 | :-------- | :------- | 
-| `name` | `string` | 
-| `artist` | `string` | 
-| `album` | `string` | 
-| `year` | `int` | 
-| `genre` | `string` | 
-| `duration` | `int` |
-| `isPrivate` | `boolean` | 
+| name | `string` | 
+| artist | `string` | 
+| album | `string` | 
+| year | `int` | 
+| genre | `string` | 
+| duration | `int` |
+| isPrivate | `boolean` | 
 
 ### Listar canciones logueandose
 _Mostrar las canciones sean públicas o privadas_
@@ -87,7 +87,7 @@ _Mostrar las canciones sean públicas o privadas_
 
 | Headers | Type     |           
 | :-------- | :------- | 
-| `Authorization` | `string` |
+| Authorization | `string` |
 
 ### Listar canciones sin loguearse
 _Únicamente se mostrará las canciones publicas_
